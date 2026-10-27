@@ -143,19 +143,27 @@ async function initCoupleBySlug() {
   if (audioEl) audioEl.src = `${CLIENT_URL}/musik.mp3`;
 
   // Map Otomatis Gambar Berdasarkan ID (main1-3, galeri1-10, akad, resepsi, foto-poster, dll.)
+  // Map Otomatis Gambar Berdasarkan ID (Hanya ganti path folder, pertahankan ID file)
   document.querySelectorAll("img[id]").forEach((img) => {
-    const fileExt = img.src.split(".").pop() || "webp";
-    const targetSrc = `${CLIENT_URL}/${img.id}.${fileExt.length > 4 ? "webp" : fileExt}`;
+    // 1. Ambil ekstensi dari src bawaan, atau default ke webp
+    let fileExt = "webp";
+    if (img.src && img.src.includes(".")) {
+      const parts = img.src.split(".");
+      fileExt = parts[parts.length - 1].split("?")[0];
+    }
 
+    // 2. Tembak langsung ke folder klien berdasarkan id tag (misal: clients/demo/galeri1.webp)
+    const targetSrc = `${CLIENT_URL}/${img.id}.${fileExt}`;
+
+    // 3. Pasang foto baru
     img.src = targetSrc;
 
-    // Fallback template jika gambar spesifik belum diunggah
+    // 4. Fallback hanya jika file benar-benar tidak ada di server
     img.onerror = () => {
-      img.onerror = null;
+      img.onerror = null; // Cegah infinite loop
       img.src = TEMPLATE_FOTO;
     };
   });
-
   // Tangkap parameter nama tamu (?to=...)
   const namaTamuParam = urlParams.get("to");
   const namaTamuFinal = namaTamuParam
