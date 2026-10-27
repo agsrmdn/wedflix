@@ -1,0 +1,413 @@
+<!doctype html>
+<html lang="id">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Wedflix - Director Dashboard</title>
+
+    <!-- Tailwind CSS & Phosphor Icons -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/@phosphor-icons/web"></script>
+    <!-- Supabase CDN -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+    <!-- Memanggil file konfigurasi.js yang sudah ada di proyek Anda -->
+    <script src="./js/konfigurasi.js"></script>
+
+    <style>
+      body {
+        background-color: #141414;
+        color: #e5e5e5;
+      }
+      .netflix-gradient {
+        background: radial-gradient(
+          120% 100% at 50% 0%,
+          #3a0606 0%,
+          #141414 50%
+        );
+      }
+      .glass-card {
+        background: rgba(24, 24, 24, 0.8);
+        backdrop-filter: blur(12px);
+        border: 1px solid rgba(255, 255, 255, 0.05);
+      }
+      ::-webkit-scrollbar {
+        width: 6px;
+      }
+      ::-webkit-scrollbar-track {
+        background: #141414;
+      }
+      ::-webkit-scrollbar-thumb {
+        background: #333;
+        border-radius: 4px;
+      }
+      ::-webkit-scrollbar-thumb:hover {
+        background: #e50914;
+      }
+    </style>
+  </head>
+  <body
+    class="netflix-gradient min-h-screen font-sans antialiased selection:bg-red-600 selection:text-white"
+  >
+    <!-- NAVBAR -->
+    <nav
+      class="border-b border-white/10 bg-black/50 backdrop-blur-md sticky top-0 z-50"
+    >
+      <div
+        class="max-w-4xl mx-auto px-4 py-4 flex justify-between items-center"
+      >
+        <div
+          class="flex items-center gap-2 text-red-600 font-black text-2xl tracking-tighter uppercase"
+        >
+          <i class="ph-fill ph-film-strip text-3xl"></i> Wedflix
+          <span
+            class="text-white text-sm tracking-widest font-normal ml-2 opacity-50"
+            >STUDIO</span
+          >
+        </div>
+        <div
+          class="text-xs font-mono text-gray-400 bg-white/5 px-3 py-1.5 rounded-full border border-white/10 flex items-center gap-2 shadow-sm"
+        ></div>
+      </div>
+    </nav>
+
+    <!-- KONTEN UTAMA -->
+    <main class="max-w-3xl mx-auto px-4 py-10 space-y-10">
+      <!-- 1. METRIK KEHADIRAN -->
+      <section>
+        <h2
+          class="text-sm font-bold text-gray-400 uppercase tracking-widest mb-5 flex items-center gap-2"
+        >
+          <i class="ph-bold ph-chart-bar text-red-500"></i> Audience Analytics
+        </h2>
+        <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+          <div
+            class="glass-card p-5 rounded-xl text-center shadow-lg transition hover:scale-105 duration-300"
+          >
+            <p
+              class="text-[10px] text-gray-500 uppercase tracking-widest font-bold mb-1.5"
+            >
+              Total RSVP
+            </p>
+            <p id="count-total" class="text-4xl font-black text-white">0</p>
+          </div>
+          <div
+            class="glass-card p-5 rounded-xl text-center border-b-2 border-b-green-500 shadow-lg transition hover:scale-105 duration-300"
+          >
+            <p
+              class="text-[10px] text-gray-500 uppercase tracking-widest font-bold mb-1.5"
+            >
+              Hadir
+            </p>
+            <p id="count-hadir" class="text-4xl font-black text-green-400">0</p>
+          </div>
+          <div
+            class="glass-card p-5 rounded-xl text-center border-b-2 border-b-red-500 shadow-lg transition hover:scale-105 duration-300"
+          >
+            <p
+              class="text-[10px] text-gray-500 uppercase tracking-widest font-bold mb-1.5"
+            >
+              Tidak Hadir
+            </p>
+            <p id="count-tidak" class="text-4xl font-black text-red-400">0</p>
+          </div>
+          <div
+            class="glass-card p-5 rounded-xl text-center border-b-2 border-b-yellow-500 shadow-lg transition hover:scale-105 duration-300"
+          >
+            <p
+              class="text-[10px] text-gray-500 uppercase tracking-widest font-bold mb-1.5"
+            >
+              Ragu
+            </p>
+            <p id="count-ragu" class="text-4xl font-black text-yellow-400">0</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- 2. WHATSAPP LINK GENERATOR -->
+      <section
+        class="glass-card p-8 rounded-2xl shadow-2xl relative overflow-hidden border border-gray-800"
+      >
+        <!-- Aksen Dekoratif -->
+        <div
+          class="absolute top-0 right-0 w-48 h-48 bg-red-600/10 blur-[60px] pointer-events-none"
+        ></div>
+
+        <h2
+          class="text-sm font-bold text-gray-400 uppercase tracking-widest mb-6 flex items-center gap-2 relative z-10"
+        >
+          <i class="ph-bold ph-paper-plane-right text-red-500"></i> Smart
+          Message Generator
+        </h2>
+
+        <div class="space-y-5 relative z-10">
+          <!-- Input Nama Tamu -->
+          <div>
+            <label
+              class="block text-xs font-bold text-gray-400 uppercase tracking-wider mb-2"
+              >Nama Tamu Undangan</label
+            >
+            <input
+              type="text"
+              id="gen-nama"
+              placeholder="Contoh: Bpk. Budi Santoso / Sisca & Partner"
+              oninput="generateMessage()"
+              class="w-full bg-[#111] border border-gray-700 rounded-lg px-4 py-3 text-white text-sm focus:outline-none focus:border-red-600 transition shadow-inner"
+            />
+          </div>
+
+          <!-- Pilihan Gaya Bahasa (Polos, Tanpa Icon) -->
+          <div>
+            <label
+              class="block text-xs font-bold text-gray-400 uppercase tracking-wider mb-2"
+              >Gaya Bahasa Penyampaian</label
+            >
+            <div
+              class="flex gap-1.5 bg-[#111] p-1.5 rounded-lg border border-gray-700 shadow-inner"
+            >
+              <label class="flex-1 text-center relative cursor-pointer">
+                <input
+                  type="radio"
+                  name="tone"
+                  value="formal"
+                  checked
+                  onchange="generateMessage()"
+                  class="peer hidden"
+                />
+                <div
+                  class="peer-checked:bg-red-600 peer-checked:text-white text-gray-400 text-xs font-bold py-2.5 rounded-md transition-all duration-300"
+                >
+                  Formal
+                </div>
+              </label>
+              <label class="flex-1 text-center relative cursor-pointer">
+                <input
+                  type="radio"
+                  name="tone"
+                  value="hangat"
+                  onchange="generateMessage()"
+                  class="peer hidden"
+                />
+                <div
+                  class="peer-checked:bg-red-600 peer-checked:text-white text-gray-400 text-xs font-bold py-2.5 rounded-md transition-all duration-300"
+                >
+                  Hangat
+                </div>
+              </label>
+              <label class="flex-1 text-center relative cursor-pointer">
+                <input
+                  type="radio"
+                  name="tone"
+                  value="singkat"
+                  onchange="generateMessage()"
+                  class="peer hidden"
+                />
+                <div
+                  class="peer-checked:bg-red-600 peer-checked:text-white text-gray-400 text-xs font-bold py-2.5 rounded-md transition-all duration-300"
+                >
+                  Singkat
+                </div>
+              </label>
+            </div>
+          </div>
+
+          <!-- Pratinjau Pesan -->
+          <div>
+            <label
+              class="block text-xs font-bold text-gray-400 uppercase tracking-wider mb-2"
+              >Pratinjau & Sunting Pesan WhatsApp</label
+            >
+            <!-- Atribut readonly sudah dihapus, sehingga teks di dalamnya bebas diedit langsung -->
+            <textarea
+              id="gen-preview"
+              rows="13"
+              class="w-full bg-[#0a0a0a] border border-gray-700 rounded-lg px-4 py-3 text-gray-300 text-xs focus:outline-none focus:border-red-600 resize-none leading-relaxed shadow-inner"
+            ></textarea>
+          </div>
+
+          <!-- Action Buttons -->
+          <div class="flex flex-col sm:flex-row gap-3 pt-2">
+            <button
+              onclick="copyMessage()"
+              id="btn-copy"
+              class="flex-1 bg-white text-black hover:bg-gray-200 font-bold py-3.5 rounded-lg text-xs tracking-wider uppercase transition flex items-center justify-center gap-2 shadow-md cursor-pointer"
+            >
+              <i class="ph-bold ph-copy text-sm"></i> Salin Pesan
+            </button>
+            <button
+              onclick="sendWhatsApp()"
+              class="flex-1 bg-[#25D366] hover:bg-[#1ebd5a] text-white font-bold py-3.5 rounded-lg text-xs tracking-wider uppercase transition flex items-center justify-center gap-2 shadow-md cursor-pointer"
+            >
+              <i class="ph-bold ph-whatsapp-logo text-sm"></i> Kirim WhatsApp
+            </button>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <!-- ==================== CORE LOGIC ==================== -->
+    <script>
+      if (!window.SUPABASE_CONFIG) {
+        console.error(
+          "Error: File konfigurasi.js belum dimuat atau konfigurasi salah.",
+        );
+      }
+      const { createClient } = supabase;
+      const _supabase = createClient(
+        window.SUPABASE_CONFIG.url,
+        window.SUPABASE_CONFIG.anonKey,
+      );
+      let currentCoupleId = null;
+
+      const baseUrl =
+        window.location.origin +
+        window.location.pathname.replace("admin.html", "index.html");
+      const slug =
+        new URLSearchParams(window.location.search).get("slug") ||
+        window.SUPABASE_CONFIG?.slug ||
+        "demo";
+
+      async function initAdmin() {
+        try {
+          const { data, error } = await _supabase
+            .from("pasangan")
+            .select("id")
+            .eq("slug", slug)
+            .single();
+          if (error || !data) throw error;
+          currentCoupleId = data.id;
+          fetchMetricsData();
+        } catch (err) {
+          console.error("Gagal verifikasi UUID:", err.message);
+        }
+      }
+
+      async function fetchMetricsData() {
+        if (!currentCoupleId) return;
+        try {
+          const { data, error } = await _supabase
+            .from("ucapan_tamu")
+            .select("kehadiran")
+            .eq("pasangan_id", currentCoupleId);
+
+          if (error) throw error;
+          calculateMetrics(data);
+        } catch (err) {
+          console.error("Gagal mengambil data metrik:", err.message);
+        }
+      }
+
+      function calculateMetrics(data) {
+        let hadir = 0,
+          tidak = 0,
+          ragu = 0;
+        if (data && data.length > 0) {
+          data.forEach((item) => {
+            const stat = item.kehadiran ? item.kehadiran.toLowerCase() : "";
+            if (stat.includes("tidak")) tidak++;
+            else if (stat.includes("ragu")) ragu++;
+            else hadir++;
+          });
+        }
+        document.getElementById("count-total").innerText = data
+          ? data.length
+          : 0;
+        document.getElementById("count-hadir").innerText = hadir;
+        document.getElementById("count-tidak").innerText = tidak;
+        document.getElementById("count-ragu").innerText = ragu;
+      }
+
+      // Simpan status apakah user sedang mengedit secara manual
+      let isUserEditing = false;
+      const previewEl = document.getElementById("gen-preview");
+
+      // Deteksi jika user mengetik sesuatu di kotak preview
+      previewEl.addEventListener("input", () => {
+        isUserEditing = true;
+      });
+
+      function generateMessage() {
+        const nama = document.getElementById("gen-nama").value.trim();
+        const namaDisplay = nama ? `*${nama}*` : "[Nama Tamu]";
+        const namaUrlEncoded = encodeURIComponent(nama);
+        const linkUndangan = `${baseUrl}?slug=${slug}&to=${namaUrlEncoded}`;
+
+        const toneOptions = document.getElementsByName("tone");
+        let selectedTone = "formal";
+        for (const option of toneOptions) {
+          if (option.checked) {
+            selectedTone = option.value;
+            break;
+          }
+        }
+
+        // PERBAIKAN UTAMA DI SINI:
+        // Memeriksa apakah window.SUPABASE_CONFIG dan namaPasangan ada. Jika tidak, gunakan teks default "Mempelai" agar tidak undefined.
+        let namaMempelai = "Mempelai";
+        if (
+          typeof window.SUPABASE_CONFIG !== "undefined" &&
+          window.SUPABASE_CONFIG.namaPasangan
+        ) {
+          namaMempelai = window.SUPABASE_CONFIG.namaPasangan;
+        }
+
+        let pesan = "";
+
+        switch (selectedTone) {
+          case "formal":
+            pesan = `Assalamu'alaikum Warahmatullahi Wabarakatuh / Salam Sejahtera,\n\nKepada Yth,\n${namaDisplay}\ndi Tempat\n\nTanpa mengurangi rasa hormat, perkenankan kami mengundang Bapak/Ibu/Saudara/i untuk hadir dan memberikan doa restu pada acara pernikahan kami.\n\nDetail informasi acara, lokasi, dan RSVP dapat diakses melalui tautan undangan digital berikut:\n${linkUndangan}\n\nKehadiran serta doa restu dari Bapak/Ibu/Saudara/i merupakan suatu kehormatan dan kebahagiaan yang tak terhingga bagi kami.\n\nTerima kasih atas perhatiannya.\n\nHormat kami,\n${namaMempelai}`;
+            break;
+
+          case "hangat":
+            pesan = `Halo ${namaDisplay},\n\nSemoga pesan ini menjumpai Anda dalam keadaan sehat dan bahagia.\n\nDi momen yang paling membahagiakan dalam hidup kami, rasanya tidak lengkap tanpa kehadiran orang-orang terdekat. Dengan penuh rasa syukur, kami ingin membagikan kabar bahagia pernikahan kami.\n\nInformasi lengkap mengenai acara telah kami rangkum dalam tautan undangan digital berikut:\n${linkUndangan}\n\nKami sangat menantikan kehadiran Anda untuk ikut merayakan hari istimewa ini bersama kami. Doa dan dukungan dari Anda sangat berarti bagi langkah baru kami.\n\nSampai jumpa di hari bahagia nanti.\n\nSalam hangat,\n${namaMempelai}`;
+            break;
+
+          case "singkat":
+            pesan = `Salam Bahagia,\n\nKepada Yth. ${namaDisplay},\n\nDengan memohon rahmat Tuhan Yang Maha Esa, kami bermaksud mengundang Anda untuk hadir pada hari pernikahan kami.\n\nInformasi mengenai waktu, lokasi acara, dan konfirmasi kehadiran (RSVP) dapat dilihat melalui tautan berikut:\n${linkUndangan}\n\nMerupakan suatu kehormatan bagi kami apabila Anda berkenan hadir untuk memberikan doa restu.\n\nTerima kasih,\n${namaMempelai}`;
+            break;
+        }
+
+        // Masukkan ke dalam kotak teks preview
+        if (!isUserEditing || document.activeElement !== previewEl) {
+          previewEl.value = pesan;
+        }
+        return pesan;
+      }
+
+      // Tambahkan fungsi reset jika sewaktu-waktu ingin kembali ke template awal saat nama/gaya diubah
+      function resetAndGenerate() {
+        isUserEditing = false;
+        generateMessage();
+      }
+
+      function copyMessage() {
+        const pesan = generateMessage();
+        navigator.clipboard.writeText(pesan).then(() => {
+          const btn = document.getElementById("btn-copy");
+          const asli = btn.innerHTML;
+          btn.innerHTML = `<i class="ph-bold ph-check text-sm"></i> Tersalin!`;
+          btn.classList.replace("bg-white", "bg-green-500");
+          btn.classList.replace("text-black", "text-white");
+          setTimeout(() => {
+            btn.innerHTML = asli;
+            btn.classList.replace("bg-green-500", "bg-white");
+            btn.classList.replace("text-white", "text-black");
+          }, 2000);
+        });
+      }
+
+      function sendWhatsApp() {
+        const pesan = generateMessage();
+        window.open(
+          `https://wa.me/?text=${encodeURIComponent(pesan)}`,
+          "_blank",
+        );
+      }
+
+      document.addEventListener("DOMContentLoaded", () => {
+        initAdmin();
+        generateMessage();
+      });
+    </script>
+  </body>
+</html>
