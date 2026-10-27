@@ -330,7 +330,11 @@
         const nama = document.getElementById("gen-nama").value.trim();
         const namaDisplay = nama ? `*${nama}*` : "[Nama Tamu]";
         const namaUrlEncoded = encodeURIComponent(nama);
-        const linkUndangan = `${baseUrl}?slug=${slug}&to=${namaUrlEncoded}`;
+        // 1. Ambil domain utama tanpa path /admin
+        const cleanBaseUrl = window.location.origin;
+
+        // 2. Susun link menuju index utama menggunakan parameter ?client=
+        const linkUndangan = `${cleanBaseUrl}/?client=${slug}&to=${namaUrlEncoded}`;
 
         const toneOptions = document.getElementsByName("tone");
         let selectedTone = "formal";
